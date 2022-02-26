@@ -1,6 +1,7 @@
 #ifndef __eglplatform_h_
 #define __eglplatform_h_
 
+#include <gbm.h>
 /*
 ** Copyright (c) 2007-2016 The Khronos Group Inc.
 **
