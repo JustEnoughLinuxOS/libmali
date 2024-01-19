@@ -37,6 +37,12 @@ endif
 
 message('Source libraries: @0@'.format(libs))
 
+# Parse platforms
+has_gbm = run_command('grep', '-wq', 'gbm_create_device', default_lib,
+  check : false).returncode() == 0
+has_x11 = run_command('grep', '-wq', 'XSync', default_lib,
+  check : false).returncode() == 0
+
 # Required packages
 requires = []
 if platform == 'gbm'
@@ -240,6 +246,17 @@ foreach name, values : map
       install_mode : ['rw-r--r--', 'root'],
       strip_directory : true)
   endforeach
+
+  if name == 'gbm'
+    # Hack unsupported gbm_bo flags
+    meson.add_install_script('scripts/fixup_gbm.sh', get_option('includedir'))
+  endif
+
+  if name == 'egl' and not has_x11
+    # Disable X11 in EGL header
+    meson.add_install_script('scripts/fixup_egl_nox11.sh',
+      get_option('includedir'))
+  endif
 
   pkgconfig.generate(
     libraries : ['-L${libdir} -lmali', wrapper_ldflags],
